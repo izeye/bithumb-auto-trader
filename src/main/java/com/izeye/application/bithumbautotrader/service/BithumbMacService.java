@@ -7,6 +7,6 @@ package com.izeye.application.bithumbautotrader.service;
  */
 public interface BithumbMacService {
 
-    String createMac(String value);
+	String createMac(String value);
 
 }

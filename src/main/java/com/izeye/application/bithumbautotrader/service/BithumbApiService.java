@@ -9,6 +9,6 @@ import com.izeye.application.bithumbautotrader.domain.TradePlaceRequest;
  */
 public interface BithumbApiService {
 
-    String tradePlace(TradePlaceRequest request);
+	String tradePlace(TradePlaceRequest request);
 
 }

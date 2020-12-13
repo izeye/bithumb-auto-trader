@@ -14,7 +14,8 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @Data
 public class BithumbProperties {
 
-    private final String connectKey;
-    private final String secretKey;
+	private final String connectKey;
+
+	private final String secretKey;
 
 }

@@ -7,14 +7,14 @@ package com.izeye.application.bithumbautotrader.domain;
  */
 public enum TradePlaceType {
 
-    /**
-     * For bid (buy).
-     */
-    BID,
+	/**
+	 * For bid (buy).
+	 */
+	BID,
 
-    /**
-     * For ask (sell).
-     */
-    ASK
+	/**
+	 * For ask (sell).
+	 */
+	ASK
 
 }

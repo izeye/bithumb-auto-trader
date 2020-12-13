@@ -10,10 +10,14 @@ import lombok.Data;
 @Data
 public class TradePlaceRequest {
 
-    private final Currency orderCurrency;
-    private final Currency paymentCurrency;
-    private final double units;
-    private final int price;
-    private final TradePlaceType type;
+	private final Currency orderCurrency;
+
+	private final Currency paymentCurrency;
+
+	private final double units;
+
+	private final int price;
+
+	private final TradePlaceType type;
 
 }
