@@ -22,15 +22,15 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'commons-codec:commons-codec'
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("commons-codec:commons-codec")
 
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.26")
 }
