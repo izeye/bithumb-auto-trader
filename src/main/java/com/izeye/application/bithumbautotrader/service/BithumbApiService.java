@@ -1,5 +1,6 @@
 package com.izeye.application.bithumbautotrader.service;
 
+import java.util.Map;
 import java.util.Set;
 
 import reactor.core.publisher.Flux;
@@ -19,6 +20,8 @@ public interface BithumbApiService {
 	Mono<OrderBook> getOrderBook(Currency cryptocurrency, Currency fiatCurrency);
 
 	Flux<OrderBook> getOrderBooks(Set<Currency> cryptocurrencies, Currency fiatCurrency);
+
+	Map<Currency, Double> getBalance(Currency currency);
 
 	String tradePlace(TradePlaceRequest request);
 

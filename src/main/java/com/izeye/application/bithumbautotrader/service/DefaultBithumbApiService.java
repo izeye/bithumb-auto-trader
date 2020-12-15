@@ -3,6 +3,7 @@ package com.izeye.application.bithumbautotrader.service;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,9 +38,9 @@ public class DefaultBithumbApiService implements BithumbApiService {
 	private static final String URI_TEMPLATE_ORDER_BOOK = URI_PREFIX
 			+ "/public/orderbook/{cryptocurrency}_{fiatCurrency}?count=1";
 
-	private static final String PATH_TRADE_PLACE = "/trade/place";
+	private static final String PATH_INFO_BALANCE = "/info/balance";
 
-	private static final String URI_TRADE_PLACE = URI_PREFIX + PATH_TRADE_PLACE;
+	private static final String PATH_TRADE_PLACE = "/trade/place";
 
 	private static final ParameterizedTypeReference<Map<String, Object>> MAP_STRING_OBJECT = new ParameterizedTypeReference<>() {
 	};
@@ -84,6 +85,21 @@ public class DefaultBithumbApiService implements BithumbApiService {
 	}
 
 	@Override
+	public Map<Currency, Double> getBalance(Currency currency) {
+		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+		parameters.add("currency", currency.name());
+
+		Map<String, Object> responseMap = request(PATH_INFO_BALANCE, parameters);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> data = (Map<String, Object>) responseMap.get("data");
+
+		Map<Currency, Double> unitsByCurrency = new HashMap<>();
+		unitsByCurrency.put(Currency.KRW, Double.valueOf((String) data.get("total_krw")));
+		unitsByCurrency.put(currency, Double.valueOf((String) data.get("total_" + currency.name().toLowerCase())));
+		return unitsByCurrency;
+	}
+
+	@Override
 	public String tradePlace(TradePlaceRequest request) {
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 		parameters.add("order_currency", request.getOrderCurrency().name());
@@ -107,7 +123,7 @@ public class DefaultBithumbApiService implements BithumbApiService {
 
 		String mac = this.bithumbMacService.createMac(data);
 
-		Map<String, Object> responseMap = this.webClient.post().uri(URI_TRADE_PLACE)
+		Map<String, Object> responseMap = this.webClient.post().uri(URI_PREFIX + path)
 				.header("Api-Key", this.properties.getConnectKey()).header("Api-Sign", mac)
 				.header("Api-Nonce", String.valueOf(nonce)).header("api-client-type", "2")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).body(BodyInserters.fromFormData(parameters))

@@ -1,6 +1,7 @@
 package com.izeye.application.bithumbautotrader.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Disabled;
@@ -73,6 +74,14 @@ class BithumbApiServiceTests {
 		TradePlaceRequest request = new TradePlaceRequest(orderCurrency, paymentCurrency, units, price, type);
 		String orderId = this.bithumbApiService.tradePlace(request);
 		assertThat(orderId).isNotNull();
+	}
+
+	@Test
+	void getBalance() {
+		Map<Currency, Double> balance = this.bithumbApiService.getBalance(Currency.XRP);
+		System.out.println(balance);
+		assertThat(balance.get(Currency.KRW)).isGreaterThan(0);
+		assertThat(balance.get(Currency.XRP)).isGreaterThan(0);
 	}
 
 }
