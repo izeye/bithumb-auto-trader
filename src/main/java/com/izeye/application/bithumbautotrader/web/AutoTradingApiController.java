@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.izeye.application.bithumbautotrader.domain.Currency;
+import com.izeye.application.bithumbautotrader.domain.TradingScenario;
 import com.izeye.application.bithumbautotrader.domain.TradingScenarioFactory;
 import com.izeye.application.bithumbautotrader.service.AutoTradingService;
 
@@ -25,8 +26,8 @@ public class AutoTradingApiController {
 
 	@PostMapping("/start")
 	public String start() {
-		boolean started = this.autoTradingService
-				.start(TradingScenarioFactory.createLinearScenarios(Currency.XRP, 1, 10));
+		TradingScenario[] scenarios = TradingScenarioFactory.createLinearScenarios(Currency.XRP, 1, 10);
+		boolean started = this.autoTradingService.start(scenarios);
 		return started ? "Started." : "Already running.";
 	}
 
