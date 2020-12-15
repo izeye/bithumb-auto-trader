@@ -92,12 +92,19 @@ public class DefaultBithumbApiService implements BithumbApiService {
 		parameters.add("price", String.valueOf(request.getPrice()));
 		parameters.add("type", request.getType().name().toLowerCase());
 
+		Map<String, Object> responseMap = request(PATH_TRADE_PLACE, parameters);
+		return (String) responseMap.get("order_id");
+	}
+
+	private Map<String, Object> request(String path, MultiValueMap<String, String> parameters) {
 		String query = parameters.entrySet().stream().map(
 				(entry) -> entry.getKey() + "=" + URLEncoder.encode(entry.getValue().get(0), StandardCharsets.UTF_8))
 				.collect(Collectors.joining("&"));
 
 		long nonce = createNonce();
-		String data = PATH_TRADE_PLACE + ";" + query + ";" + nonce;
+
+		String data = path + ";" + query + ";" + nonce;
+
 		String mac = this.bithumbMacService.createMac(data);
 
 		Map<String, Object> responseMap = this.webClient.post().uri(URI_TRADE_PLACE)
@@ -107,13 +114,10 @@ public class DefaultBithumbApiService implements BithumbApiService {
 				.exchangeToMono((response) -> response.bodyToMono(MAP_STRING_OBJECT)).block();
 
 		String status = (String) responseMap.get("status");
-		switch (status) {
-		case "0000":
-			return (String) responseMap.get("order_id");
-
-		default:
+		if (!status.equals("0000")) {
 			throw new RuntimeException("Failed to request: " + responseMap);
 		}
+		return responseMap;
 	}
 
 	private long createNonce() {
