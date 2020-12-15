@@ -9,8 +9,8 @@ import com.izeye.application.bithumbautotrader.domain.TradingScenario;
  */
 public interface AutoTradingService {
 
-	void start(TradingScenario... scenarios);
+	boolean start(TradingScenario... scenarios);
 
-	void stop();
+	boolean stop();
 
 }

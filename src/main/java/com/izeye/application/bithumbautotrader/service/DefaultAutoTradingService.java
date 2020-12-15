@@ -2,6 +2,10 @@ package com.izeye.application.bithumbautotrader.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,10 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private final Map<Currency, OrderBook> orderBookCache = new HashMap<>();
 
+	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+	private volatile Future<?> future;
+
 	private volatile boolean running;
 
 	public DefaultAutoTradingService(BithumbApiService bithumbApiService) {
@@ -35,8 +43,17 @@ public class DefaultAutoTradingService implements AutoTradingService {
 	}
 
 	@Override
-	public void start(TradingScenario... scenarios) {
-		log.info("Auto-trading is starting.");
+	public boolean start(TradingScenario... scenarios) {
+		if (this.future != null) {
+			return false;
+		}
+
+		this.future = this.executorService.submit(() -> doStart(scenarios));
+		return true;
+	}
+
+	private void doStart(TradingScenario[] scenarios) {
+		log.info("Auto-trading started.");
 		this.running = true;
 
 		TradingScenarioExecution[] executions = createTradingScenarioExecutions(scenarios);
@@ -139,8 +156,28 @@ public class DefaultAutoTradingService implements AutoTradingService {
 	}
 
 	@Override
-	public void stop() {
-		log.info("Auto-trading is stopping.");
+	public boolean stop() {
+		if (this.future == null) {
+			return false;
+		}
+
+		doStop();
+
+		try {
+			this.future.get();
+			log.info("Auto-trading stopped.");
+		}
+		catch (InterruptedException ex) {
+			throw new RuntimeException(ex);
+		}
+		catch (ExecutionException ex) {
+			throw new RuntimeException(ex);
+		}
+		this.future = null;
+		return true;
+	}
+
+	private void doStop() {
 		this.running = false;
 	}
 
