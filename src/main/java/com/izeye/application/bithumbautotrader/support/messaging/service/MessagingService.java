@@ -9,4 +9,8 @@ public interface MessagingService {
 
 	void sendMessage(String message);
 
+	default void sendMessage(Object message) {
+		sendMessage(message.toString());
+	}
+
 }

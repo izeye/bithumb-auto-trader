@@ -109,7 +109,7 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
 						lowestSellPrice, TradePlaceType.BID);
 				this.bithumbApiService.tradePlace(request);
-				this.slackMessagingService.sendMessage("Trade place request: " + request);
+				this.slackMessagingService.sendMessage(request);
 
 				// FIXME: This should be replaced with the actual buy price.
 				int buyPrice = lowestSellPrice;
@@ -125,7 +125,7 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
 						highestBuyPrice, TradePlaceType.ASK);
 				this.bithumbApiService.tradePlace(request);
-				this.slackMessagingService.sendMessage("Trade place request: " + request);
+				this.slackMessagingService.sendMessage(request);
 
 				// FIXME: This should be replaced with the actual sell price.
 				int sellPrice = highestBuyPrice;
