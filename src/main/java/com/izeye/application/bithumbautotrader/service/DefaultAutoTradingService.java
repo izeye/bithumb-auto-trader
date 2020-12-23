@@ -18,6 +18,7 @@ import com.izeye.application.bithumbautotrader.domain.TradePlaceType;
 import com.izeye.application.bithumbautotrader.domain.TradingScenario;
 import com.izeye.application.bithumbautotrader.domain.TradingScenarioExecution;
 import com.izeye.application.bithumbautotrader.domain.TradingStrategy;
+import com.izeye.application.bithumbautotrader.support.messaging.service.SlackMessagingService;
 
 /**
  * Default {@link AutoTradingService}.
@@ -30,6 +31,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private final BithumbApiService bithumbApiService;
 
+	private final SlackMessagingService slackMessagingService;
+
 	private final Map<Currency, OrderBook> orderBookCache = new HashMap<>();
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -38,8 +41,9 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private volatile boolean running;
 
-	public DefaultAutoTradingService(BithumbApiService bithumbApiService) {
+	public DefaultAutoTradingService(BithumbApiService bithumbApiService, SlackMessagingService slackMessagingService) {
 		this.bithumbApiService = bithumbApiService;
+		this.slackMessagingService = slackMessagingService;
 	}
 
 	@Override
@@ -102,6 +106,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				log.info("buyPriceGapInPercentages: {}", buyPriceGapInPercentages);
 				log.info("Try to buy now: {}", lowestSellPrice);
 
+				this.slackMessagingService.sendMessage("Try to buy now: " + lowestSellPrice);
+
 				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
 						lowestSellPrice, TradePlaceType.BID);
 				this.bithumbApiService.tradePlace(request);
@@ -116,6 +122,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				log.info("basePrice: {}", basePrice);
 				log.info("sellPriceGapInPercentages: {}", sellPriceGapInPercentages);
 				log.info("Try to sell now: {}", highestBuyPrice);
+
+				this.slackMessagingService.sendMessage("Try to sell now: " + highestBuyPrice);
 
 				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
 						highestBuyPrice, TradePlaceType.ASK);
