@@ -101,8 +101,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 			int lowestSellPrice = (int) orderBook.getLowestAsk();
 
 			int basePrice = execution.getBasePrice();
-			int buyPriceGapInPercentages = calculateGapInPercentages(basePrice, lowestSellPrice);
-			int sellPriceGapInPercentages = calculateGapInPercentages(basePrice, highestBuyPrice);
+			double buyPriceGapInPercentages = calculateGapInPercentages(basePrice, lowestSellPrice);
+			double sellPriceGapInPercentages = calculateGapInPercentages(basePrice, highestBuyPrice);
 
 			TradingStrategy strategy = execution.getStrategy();
 			if (buyPriceGapInPercentages <= strategy.getBuySignalGapInPercentages()) {
@@ -152,8 +152,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 		return orderBook;
 	}
 
-	private int calculateGapInPercentages(int baseValue, int value) {
-		return (value - baseValue) * 100 / baseValue;
+	private double calculateGapInPercentages(int baseValue, int value) {
+		return (value - baseValue) * 100d / baseValue;
 	}
 
 	private void sleep() {
