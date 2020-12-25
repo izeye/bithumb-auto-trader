@@ -14,6 +14,6 @@ public class TradingScenario {
 
 	private final double currencyUnit;
 
-	private final int signalGapInPercentages;
+	private final double signalGapInPercentages;
 
 }

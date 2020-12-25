@@ -24,9 +24,13 @@ public class AutoTradingRunner implements ApplicationRunner {
 
 	private final BithumbApiService bithumbApiService;
 
-	public AutoTradingRunner(AutoTradingService autoTradingService, BithumbApiService bithumbApiService) {
+	private final BithumbProperties bithumbProperties;
+
+	public AutoTradingRunner(AutoTradingService autoTradingService, BithumbApiService bithumbApiService,
+			BithumbProperties bithumbProperties) {
 		this.autoTradingService = autoTradingService;
 		this.bithumbApiService = bithumbApiService;
+		this.bithumbProperties = bithumbProperties;
 	}
 
 	@Override
@@ -39,7 +43,8 @@ public class AutoTradingRunner implements ApplicationRunner {
 		int numberOfScenarios = (int) (MAX_EXPECTED_XRP_PRICE / currentPrice);
 		log.info("Number of scenarios: {}", numberOfScenarios);
 
-		TradingScenario[] scenarios = TradingScenarioFactory.createLinearScenarios(currency, 1, numberOfScenarios);
+		TradingScenario[] scenarios = TradingScenarioFactory.createLinearScenarios(currency, 1, numberOfScenarios,
+				this.bithumbProperties.getTradingFeeInPercentages());
 		this.autoTradingService.start(scenarios);
 	}
 

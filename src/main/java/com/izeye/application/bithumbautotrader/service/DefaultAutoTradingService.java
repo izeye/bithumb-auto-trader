@@ -31,6 +31,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private final BithumbApiService bithumbApiService;
 
+	private final BithumbProperties bithumbProperties;
+
 	private final SlackMessagingService slackMessagingService;
 
 	private final Map<Currency, OrderBook> orderBookCache = new HashMap<>();
@@ -41,8 +43,10 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private volatile boolean running;
 
-	public DefaultAutoTradingService(BithumbApiService bithumbApiService, SlackMessagingService slackMessagingService) {
+	public DefaultAutoTradingService(BithumbApiService bithumbApiService, BithumbProperties bithumbProperties,
+			SlackMessagingService slackMessagingService) {
 		this.bithumbApiService = bithumbApiService;
+		this.bithumbProperties = bithumbProperties;
 		this.slackMessagingService = slackMessagingService;
 	}
 
@@ -75,7 +79,7 @@ public class DefaultAutoTradingService implements AutoTradingService {
 		TradingScenarioExecution[] executions = new TradingScenarioExecution[scenarios.length];
 		for (int i = 0; i < executions.length; i++) {
 			TradingScenario scenario = scenarios[i];
-			executions[i] = new TradingScenarioExecution(scenario);
+			executions[i] = new TradingScenarioExecution(scenario, this.bithumbProperties.getTradingFeeInPercentages());
 			executions[i].setBasePrice(getCurrentBasePrice(scenario.getCurrency()));
 			executions[i].logPrices();
 		}

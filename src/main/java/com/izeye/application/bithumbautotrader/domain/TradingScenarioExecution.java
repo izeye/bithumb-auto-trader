@@ -3,6 +3,7 @@ package com.izeye.application.bithumbautotrader.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TradingScenarioExecution {
 
-	private static final double BITHUMB_TRADING_FEE_IN_PERCENTAGES = 0.25d;
-
 	private final TradingScenario scenario;
 
 	private final TradingStrategy strategy;
+
+	private final double tradingFeeInPercentages;
 
 	private final long startTime = System.currentTimeMillis();
 
@@ -40,9 +41,10 @@ public class TradingScenarioExecution {
 
 	private final List<Integer> sellPrices = new ArrayList<>();
 
-	public TradingScenarioExecution(TradingScenario scenario) {
+	public TradingScenarioExecution(TradingScenario scenario, double tradingFeeInPercentages) {
 		this.scenario = scenario;
 		this.strategy = new TradingStrategy(scenario.getSignalGapInPercentages());
+		this.tradingFeeInPercentages = tradingFeeInPercentages;
 	}
 
 	public void logPrices() {
@@ -53,16 +55,16 @@ public class TradingScenarioExecution {
 				getNextSellPrice(this.basePrice, this.strategy.getSellSignalGapInPercentages()));
 	}
 
-	private int getNextBuyPrice(int basePrice, int buySignalGapInPercentages) {
-		return applyPercentages(basePrice, buySignalGapInPercentages);
+	private int getNextBuyPrice(int basePrice, double buySignalGapInPercentages) {
+		return applyPercentages(basePrice, buySignalGapInPercentages, Math::floor);
 	}
 
-	private int getNextSellPrice(int basePrice, int sellSignalGapInPercentages) {
-		return applyPercentages(basePrice, sellSignalGapInPercentages);
+	private int getNextSellPrice(int basePrice, double sellSignalGapInPercentages) {
+		return applyPercentages(basePrice, sellSignalGapInPercentages, Math::ceil);
 	}
 
-	private int applyPercentages(int basePrice, int percentages) {
-		return basePrice * (100 + percentages) / 100;
+	private int applyPercentages(int basePrice, double percentages, Function<Double, Double> function) {
+		return function.apply(basePrice * (100 + percentages) / 100).intValue();
 	}
 
 	public void buy(int price) {
@@ -98,7 +100,7 @@ public class TradingScenarioExecution {
 	}
 
 	private int getTradingFee(int price) {
-		return (int) (price * BITHUMB_TRADING_FEE_IN_PERCENTAGES / 100);
+		return (int) (price * this.tradingFeeInPercentages / 100);
 	}
 
 	public void logTotalStatistics() {

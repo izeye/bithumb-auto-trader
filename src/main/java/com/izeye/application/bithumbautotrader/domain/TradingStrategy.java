@@ -10,11 +10,11 @@ import lombok.Data;
 @Data
 public class TradingStrategy {
 
-	private final int buySignalGapInPercentages;
+	private final double buySignalGapInPercentages;
 
-	private final int sellSignalGapInPercentages;
+	private final double sellSignalGapInPercentages;
 
-	public TradingStrategy(int signalGapInPercentages) {
+	public TradingStrategy(double signalGapInPercentages) {
 		this.buySignalGapInPercentages = -signalGapInPercentages;
 		this.sellSignalGapInPercentages = signalGapInPercentages;
 	}
