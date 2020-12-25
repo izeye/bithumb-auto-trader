@@ -1,7 +1,9 @@
 package com.izeye.application.bithumbautotrader.service;
 
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import com.izeye.application.bithumbautotrader.domain.CryptocurrencyExchange;
 import com.izeye.application.bithumbautotrader.domain.Currency;
 import com.izeye.application.bithumbautotrader.domain.OrderBook;
 import com.izeye.application.bithumbautotrader.domain.TradePlaceRequest;
+import com.izeye.application.bithumbautotrader.domain.TradePlaceType;
 
 /**
  * Default {@link BithumbApiService}.
@@ -50,6 +53,30 @@ public class DefaultBithumbApiService implements BithumbApiService {
 	private final BithumbMacService bithumbMacService;
 
 	private final WebClient webClient;
+
+	private final ThreadLocal<DecimalFormat> oneRoundingUp = ThreadLocal.withInitial(() -> {
+		DecimalFormat decimalFormat = new DecimalFormat("#.#");
+		decimalFormat.setRoundingMode(RoundingMode.UP);
+		return decimalFormat;
+	});
+
+	private final ThreadLocal<DecimalFormat> oneRoundingDown = ThreadLocal.withInitial(() -> {
+		DecimalFormat decimalFormat = new DecimalFormat("#.#");
+		decimalFormat.setRoundingMode(RoundingMode.DOWN);
+		return decimalFormat;
+	});
+
+	private final ThreadLocal<DecimalFormat> zeroRoundingUp = ThreadLocal.withInitial(() -> {
+		DecimalFormat decimalFormat = new DecimalFormat("#");
+		decimalFormat.setRoundingMode(RoundingMode.UP);
+		return decimalFormat;
+	});
+
+	private final ThreadLocal<DecimalFormat> zeroRoundingDown = ThreadLocal.withInitial(() -> {
+		DecimalFormat decimalFormat = new DecimalFormat("#");
+		decimalFormat.setRoundingMode(RoundingMode.DOWN);
+		return decimalFormat;
+	});
 
 	public DefaultBithumbApiService(BithumbProperties properties, BithumbMacService bithumbMacService,
 			WebClient.Builder webClientBuilder) {
@@ -105,11 +132,40 @@ public class DefaultBithumbApiService implements BithumbApiService {
 		parameters.add("order_currency", request.getOrderCurrency().name());
 		parameters.add("payment_currency", request.getPaymentCurrency().name());
 		parameters.add("units", String.valueOf(request.getUnits()));
-		parameters.add("price", String.valueOf(request.getPrice()));
-		parameters.add("type", request.getType().name().toLowerCase());
+
+		TradePlaceType type = request.getType();
+
+		double price = request.getPrice();
+		DecimalFormat format = selectFormat(type, price).get();
+		parameters.add("price", format.format(price));
+
+		parameters.add("type", type.name().toLowerCase());
 
 		Map<String, Object> responseMap = request(PATH_TRADE_PLACE, parameters);
 		return (String) responseMap.get("order_id");
+	}
+
+	private ThreadLocal<DecimalFormat> selectFormat(TradePlaceType type, double price) {
+		switch (type) {
+		case ASK:
+			if (price < 1000) {
+				return this.oneRoundingUp;
+			}
+			else {
+				return this.zeroRoundingUp;
+			}
+
+		case BID:
+			if (price < 1000) {
+				return this.oneRoundingDown;
+			}
+			else {
+				return this.zeroRoundingDown;
+			}
+
+		default:
+			throw new IllegalArgumentException("Unexpected type: " + type);
+		}
 	}
 
 	private Map<String, Object> request(String path, MultiValueMap<String, String> parameters) {

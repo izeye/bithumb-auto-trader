@@ -25,21 +25,21 @@ public class TradingScenarioExecution {
 
 	private final long startTime = System.currentTimeMillis();
 
-	private int basePrice;
+	private double basePrice;
 
-	private int totalBuyUnits = 0;
+	private double totalBuyUnits = 0;
 
-	private int totalSellUnits = 0;
+	private double totalSellUnits = 0;
 
-	private long totalBuyPrice = 0;
+	private double totalBuyPrice = 0;
 
-	private long totalSellPrice = 0;
+	private double totalSellPrice = 0;
 
-	private long totalTradingFee = 0;
+	private double totalTradingFee = 0;
 
-	private final List<Integer> buyPrices = new ArrayList<>();
+	private final List<Double> buyPrices = new ArrayList<>();
 
-	private final List<Integer> sellPrices = new ArrayList<>();
+	private final List<Double> sellPrices = new ArrayList<>();
 
 	public TradingScenarioExecution(TradingScenario scenario, double tradingFeeInPercentages) {
 		this.scenario = scenario;
@@ -55,24 +55,24 @@ public class TradingScenarioExecution {
 				getNextSellPrice(this.basePrice, this.strategy.getSellSignalGapInPercentages()));
 	}
 
-	private int getNextBuyPrice(int basePrice, double buySignalGapInPercentages) {
+	private double getNextBuyPrice(double basePrice, double buySignalGapInPercentages) {
 		return applyPercentages(basePrice, buySignalGapInPercentages, Math::floor);
 	}
 
-	private int getNextSellPrice(int basePrice, double sellSignalGapInPercentages) {
+	private double getNextSellPrice(double basePrice, double sellSignalGapInPercentages) {
 		return applyPercentages(basePrice, sellSignalGapInPercentages, Math::ceil);
 	}
 
-	private int applyPercentages(int basePrice, double percentages, Function<Double, Double> function) {
-		return function.apply(basePrice * (100 + percentages) / 100).intValue();
+	private double applyPercentages(double basePrice, double percentages, Function<Double, Double> function) {
+		return function.apply(basePrice * (100 + percentages) / 100);
 	}
 
-	public void buy(int price) {
+	public void buy(double price) {
 		double currencyUnit = this.scenario.getCurrencyUnit();
 		this.totalBuyUnits += currencyUnit;
 
-		int totalPrice = (int) (price * currencyUnit);
-		int tradingFee = getTradingFee(totalPrice);
+		double totalPrice = price * currencyUnit;
+		double tradingFee = getTradingFee(totalPrice);
 		log.info("Bought now: {} (Fee: {})", price, tradingFee);
 
 		this.totalBuyPrice += totalPrice;
@@ -83,12 +83,12 @@ public class TradingScenarioExecution {
 		this.buyPrices.add(price);
 	}
 
-	public void sell(int price) {
+	public void sell(double price) {
 		double currencyUnit = this.scenario.getCurrencyUnit();
 		this.totalSellUnits += currencyUnit;
 
-		int totalPrice = (int) (price * currencyUnit);
-		int tradingFee = getTradingFee(totalPrice);
+		double totalPrice = price * currencyUnit;
+		double tradingFee = getTradingFee(totalPrice);
 		log.info("Sold now: {} (Fee: {})", price, tradingFee);
 
 		this.totalSellPrice += totalPrice;
@@ -99,17 +99,17 @@ public class TradingScenarioExecution {
 		this.sellPrices.add(price);
 	}
 
-	private int getTradingFee(int price) {
-		return (int) (price * this.tradingFeeInPercentages / 100);
+	private double getTradingFee(double price) {
+		return price * this.tradingFeeInPercentages / 100;
 	}
 
 	public void logTotalStatistics() {
 		log.info("Scenario: {}", this.scenario);
 		long elapsedTimeInMillis = System.currentTimeMillis() - this.startTime;
 		log.info("Elapsed time: {} minute(s)", TimeUnit.MILLISECONDS.toMinutes(elapsedTimeInMillis));
-		long totalGain = this.totalSellPrice - this.totalBuyPrice - this.totalTradingFee;
+		double totalGain = this.totalSellPrice - this.totalBuyPrice - this.totalTradingFee;
 		log.info("Total gain: {}", totalGain);
-		int estimatedAdditionalGain = (this.totalBuyUnits - this.totalSellUnits) * this.basePrice;
+		double estimatedAdditionalGain = (this.totalBuyUnits - this.totalSellUnits) * this.basePrice;
 		log.info("Estimated total gain: {}", totalGain + estimatedAdditionalGain);
 		log.info("Total buy units: {}", this.totalBuyUnits);
 		log.info("Total sell units: {}", this.totalSellUnits);

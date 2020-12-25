@@ -16,7 +16,7 @@ public class TradePlaceRequest {
 
 	private final double units;
 
-	private final int price;
+	private final double price;
 
 	private final TradePlaceType type;
 

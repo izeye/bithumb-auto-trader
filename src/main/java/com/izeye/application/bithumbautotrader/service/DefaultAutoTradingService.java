@@ -86,9 +86,9 @@ public class DefaultAutoTradingService implements AutoTradingService {
 		return executions;
 	}
 
-	private int getCurrentBasePrice(Currency currency) {
-		OrderBook orderKook = getOrderBook(currency);
-		return (int) ((orderKook.getHighestBid() + orderKook.getLowestAsk()) / 2);
+	private double getCurrentBasePrice(Currency currency) {
+		OrderBook orderBook = getOrderBook(currency);
+		return (orderBook.getHighestBid() + orderBook.getLowestAsk()) / 2;
 	}
 
 	private void runExecution(TradingScenarioExecution execution) {
@@ -97,10 +97,10 @@ public class DefaultAutoTradingService implements AutoTradingService {
 			Currency currency = scenario.getCurrency();
 			OrderBook orderBook = getOrderBook(currency);
 
-			int highestBuyPrice = (int) orderBook.getHighestBid();
-			int lowestSellPrice = (int) orderBook.getLowestAsk();
+			double highestBuyPrice = orderBook.getHighestBid();
+			double lowestSellPrice = orderBook.getLowestAsk();
 
-			int basePrice = execution.getBasePrice();
+			double basePrice = execution.getBasePrice();
 			double buyPriceGapInPercentages = calculateGapInPercentages(basePrice, lowestSellPrice);
 			double sellPriceGapInPercentages = calculateGapInPercentages(basePrice, highestBuyPrice);
 
@@ -116,7 +116,7 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				this.slackMessagingService.sendMessage(request);
 
 				// FIXME: This should be replaced with the actual buy price.
-				int buyPrice = lowestSellPrice;
+				double buyPrice = lowestSellPrice;
 				execution.buy(buyPrice);
 				execution.logPrices();
 				execution.logTotalStatistics();
@@ -132,7 +132,7 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				this.slackMessagingService.sendMessage(request);
 
 				// FIXME: This should be replaced with the actual sell price.
-				int sellPrice = highestBuyPrice;
+				double sellPrice = highestBuyPrice;
 				execution.sell(sellPrice);
 				execution.logPrices();
 				execution.logTotalStatistics();
@@ -152,8 +152,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 		return orderBook;
 	}
 
-	private double calculateGapInPercentages(int baseValue, int value) {
-		return (value - baseValue) * 100d / baseValue;
+	private double calculateGapInPercentages(double baseValue, double value) {
+		return (value - baseValue) * 100 / baseValue;
 	}
 
 	private void sleep() {
