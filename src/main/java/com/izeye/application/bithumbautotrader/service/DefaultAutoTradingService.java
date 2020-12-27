@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -39,15 +41,18 @@ public class DefaultAutoTradingService implements AutoTradingService {
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+	private final Counter totalTradingCurrency;
+
 	private volatile Future<?> future;
 
 	private volatile boolean running;
 
 	public DefaultAutoTradingService(BithumbApiService bithumbApiService, BithumbProperties bithumbProperties,
-			SlackMessagingService slackMessagingService) {
+			SlackMessagingService slackMessagingService, MeterRegistry meterRegistry) {
 		this.bithumbApiService = bithumbApiService;
 		this.bithumbProperties = bithumbProperties;
 		this.slackMessagingService = slackMessagingService;
+		this.totalTradingCurrency = meterRegistry.counter("trading.currency");
 	}
 
 	@Override
@@ -105,13 +110,14 @@ public class DefaultAutoTradingService implements AutoTradingService {
 			double sellPriceGapInPercentages = calculateGapInPercentages(basePrice, highestBuyPrice);
 
 			TradingStrategy strategy = execution.getStrategy();
+			double currencyUnit = scenario.getCurrencyUnit();
 			if (buyPriceGapInPercentages <= strategy.getBuySignalGapInPercentages()) {
 				log.info("basePrice: {}", basePrice);
 				log.info("buyPriceGapInPercentages: {}", buyPriceGapInPercentages);
 				log.info("Try to buy now: {}", lowestSellPrice);
 
-				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
-						lowestSellPrice, TradePlaceType.BID);
+				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, currencyUnit, lowestSellPrice,
+						TradePlaceType.BID);
 				this.bithumbApiService.tradePlace(request);
 				this.slackMessagingService.sendMessage(request);
 
@@ -120,14 +126,16 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				execution.buy(buyPrice);
 				execution.logPrices();
 				execution.logTotalStatistics();
+
+				this.totalTradingCurrency.increment(buyPrice * currencyUnit);
 			}
 			else if (sellPriceGapInPercentages >= strategy.getSellSignalGapInPercentages()) {
 				log.info("basePrice: {}", basePrice);
 				log.info("sellPriceGapInPercentages: {}", sellPriceGapInPercentages);
 				log.info("Try to sell now: {}", highestBuyPrice);
 
-				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, scenario.getCurrencyUnit(),
-						highestBuyPrice, TradePlaceType.ASK);
+				TradePlaceRequest request = new TradePlaceRequest(currency, Currency.KRW, currencyUnit, highestBuyPrice,
+						TradePlaceType.ASK);
 				this.bithumbApiService.tradePlace(request);
 				this.slackMessagingService.sendMessage(request);
 
@@ -136,6 +144,8 @@ public class DefaultAutoTradingService implements AutoTradingService {
 				execution.sell(sellPrice);
 				execution.logPrices();
 				execution.logTotalStatistics();
+
+				this.totalTradingCurrency.increment(sellPrice * currencyUnit);
 			}
 		}
 		catch (RuntimeException ex) {
