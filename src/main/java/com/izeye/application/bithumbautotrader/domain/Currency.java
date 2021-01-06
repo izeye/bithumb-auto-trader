@@ -28,6 +28,11 @@ public enum Currency {
 	JPY(CurrencyType.FIAT),
 
 	/**
+	 * For Cardano.
+	 */
+	ADA(CurrencyType.CRYPTO),
+
+	/**
 	 * For Bitcoin.
 	 */
 	BTC(CurrencyType.CRYPTO),
