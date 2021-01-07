@@ -112,9 +112,10 @@ public class DefaultBithumbApiService implements BithumbApiService {
 	}
 
 	@Override
-	public Map<Currency, Double> getBalance(Currency currency) {
+	public Map<Currency, Double> getBalance(Set<Currency> currencies) {
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-		parameters.add("currency", currency.name());
+		String currencyParameter = (currencies.size() == 1) ? currencies.iterator().next().name() : "ALL";
+		parameters.add("currency", currencyParameter);
 
 		Map<String, Object> responseMap = request(PATH_INFO_BALANCE, parameters);
 		@SuppressWarnings("unchecked")
@@ -122,7 +123,9 @@ public class DefaultBithumbApiService implements BithumbApiService {
 
 		Map<Currency, Double> unitsByCurrency = new HashMap<>();
 		unitsByCurrency.put(Currency.KRW, Double.valueOf((String) data.get("total_krw")));
-		unitsByCurrency.put(currency, Double.valueOf((String) data.get("total_" + currency.name().toLowerCase())));
+		for (Currency currency : currencies) {
+			unitsByCurrency.put(currency, Double.valueOf((String) data.get("total_" + currency.name().toLowerCase())));
+		}
 		return unitsByCurrency;
 	}
 

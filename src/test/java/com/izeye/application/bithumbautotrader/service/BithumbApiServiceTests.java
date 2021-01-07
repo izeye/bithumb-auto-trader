@@ -1,5 +1,7 @@
 package com.izeye.application.bithumbautotrader.service;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,10 +80,26 @@ class BithumbApiServiceTests {
 
 	@Test
 	void getBalance() {
-		Map<Currency, Double> balance = this.bithumbApiService.getBalance(Currency.XRP);
+		Currency currency = Currency.XRP;
+
+		Map<Currency, Double> balance = this.bithumbApiService.getBalance(currency);
 		System.out.println(balance);
+
 		assertThat(balance.get(Currency.KRW)).isGreaterThan(0);
-		assertThat(balance.get(Currency.XRP)).isGreaterThan(0);
+		assertThat(balance.get(currency)).isGreaterThan(0);
+	}
+
+	@Test
+	void getBalanceSetOfCurrencies() {
+		Set<Currency> currencies = new HashSet<>(Arrays.asList(Currency.XRP, Currency.ADA, Currency.XTZ));
+
+		Map<Currency, Double> balance = this.bithumbApiService.getBalance(currencies);
+		System.out.println(balance);
+
+		assertThat(balance.get(Currency.KRW)).isGreaterThan(0);
+		for (Currency currency : currencies) {
+			assertThat(balance.get(currency)).isGreaterThan(0);
+		}
 	}
 
 }

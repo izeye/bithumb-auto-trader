@@ -1,6 +1,9 @@
 package com.izeye.application.bithumbautotrader.service;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -30,25 +33,32 @@ public class BalanceMetricsCollector implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) {
-		Currency currency = Currency.XRP;
+		Set<Currency> currencies = new HashSet<>(Arrays.asList(Currency.XRP, Currency.ADA, Currency.XTZ));
 
 		// FIXME:
 		// - Apply cache to BithumbApiService.getBalance().
 		// - Use non-blocking suppliers for gauges in BalanceMetricsCollector.
-		Gauge.builder("balance", () -> this.bithumbApiService.getBalance(currency).get(Currency.KRW))
-				.tag("currency", currency.KRW.name()).register(this.meterRegistry);
-		Gauge.builder("balance", () -> this.bithumbApiService.getBalance(currency).get(currency))
-				.tag("currency", currency.name()).register(this.meterRegistry);
-		Gauge.builder("balance.total", () -> getTotalBalance(currency)).register(this.meterRegistry);
+		Gauge.builder("balance", () -> this.bithumbApiService.getBalance(currencies).get(Currency.KRW))
+				.tag("currency", Currency.KRW.name()).register(this.meterRegistry);
+
+		for (Currency currency : currencies) {
+			Gauge.builder("balance", () -> this.bithumbApiService.getBalance(currency).get(currency))
+					.tag("currency", currency.name()).register(this.meterRegistry);
+		}
+
+		Gauge.builder("balance.total", () -> getTotalBalance(currencies)).register(this.meterRegistry);
 	}
 
-	private double getTotalBalance(Currency currency) {
-		Map<Currency, Double> balance = this.bithumbApiService.getBalance(currency);
+	private double getTotalBalance(Set<Currency> currencies) {
+		Map<Currency, Double> balance = this.bithumbApiService.getBalance(currencies);
 
-		Double krwUnits = balance.get(Currency.KRW);
-		Double currencyUnits = balance.get(currency);
-		OrderBook orderBook = this.bithumbApiService.getOrderBook(currency, Currency.KRW).block();
-		return krwUnits + orderBook.getHighestBid() * currencyUnits;
+		double totalBalance = balance.get(Currency.KRW);
+		for (Currency currency : currencies) {
+			Double currencyUnits = balance.get(currency);
+			OrderBook orderBook = this.bithumbApiService.getOrderBook(currency, Currency.KRW).block();
+			totalBalance += orderBook.getHighestBid() * currencyUnits;
+		}
+		return totalBalance;
 	}
 
 }
