@@ -7,7 +7,7 @@ package com.izeye.application.bithumbautotrader.domain;
  */
 public final class TradingScenarioFactory {
 
-	private static final int CURRENCY_UNIT_BASE = 5;
+	private static final int CURRENCY_UNIT_BASE = 3;
 
 	public static TradingScenario[] createLinearScenarios(Currency currency, int start, int end,
 			double tradingFeeInPercentages) {
