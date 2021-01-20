@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Tests for {@link SlackService}.
  *
@@ -19,7 +21,13 @@ class SlackServiceTests {
 	@Disabled("This will trigger a message.")
 	@Test
 	void sendMessage() {
-		this.slackService.sendMessage("Hello, world!");
+		assertThat(this.slackService.sendMessage("Hello, world!")).isTrue();
+	}
+
+	@Disabled("This will trigger a file upload.")
+	@Test
+	void uploadFile() {
+		assertThat(this.slackService.uploadFile("greeting.txt", "Hello, world!")).isTrue();
 	}
 
 }

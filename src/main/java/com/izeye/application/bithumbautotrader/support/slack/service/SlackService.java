@@ -7,6 +7,8 @@ package com.izeye.application.bithumbautotrader.support.slack.service;
  */
 public interface SlackService {
 
-	void sendMessage(String message);
+	boolean sendMessage(String message);
+
+	boolean uploadFile(String filename, String content);
 
 }
