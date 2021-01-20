@@ -34,7 +34,7 @@ public class BalanceMetricsCollector implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) {
 		Set<Currency> currencies = new HashSet<>(
-				Arrays.asList(Currency.XRP, Currency.ADA, Currency.XTZ, Currency.BTC, Currency.ETH));
+				Arrays.asList(Currency.XRP, Currency.ADA, Currency.XLM, Currency.XTZ, Currency.BTC, Currency.ETH));
 
 		// FIXME:
 		// - Apply cache to BithumbApiService.getBalance().

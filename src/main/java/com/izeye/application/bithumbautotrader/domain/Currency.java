@@ -48,6 +48,11 @@ public enum Currency {
 	LINK(CurrencyType.CRYPTO),
 
 	/**
+	 * For Stellar Lumens.
+	 */
+	XLM(CurrencyType.CRYPTO),
+
+	/**
 	 * For Ripple.
 	 */
 	XRP(CurrencyType.CRYPTO),
