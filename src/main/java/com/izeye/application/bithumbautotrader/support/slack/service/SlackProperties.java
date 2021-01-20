@@ -1,4 +1,4 @@
-package com.izeye.application.bithumbautotrader.support.messaging.service;
+package com.izeye.application.bithumbautotrader.support.slack.service;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
