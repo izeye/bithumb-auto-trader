@@ -44,9 +44,9 @@ public class DefaultSlackService implements SlackService {
 	}
 
 	@Override
-	public boolean uploadFile(String filename, String content) {
+	public boolean uploadFile(String title, String content) {
 		FilesUploadRequest request = FilesUploadRequest.builder().channels(Arrays.asList(this.properties.getChannel()))
-				.filename(filename).content(content).build();
+				.title(title).content(content).build();
 		try {
 			FilesUploadResponse response = this.client.filesUpload(request);
 			return response.isOk();

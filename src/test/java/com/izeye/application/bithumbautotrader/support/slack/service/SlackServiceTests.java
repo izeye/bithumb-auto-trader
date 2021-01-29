@@ -27,7 +27,7 @@ class SlackServiceTests {
 	@Disabled("This will trigger a file upload.")
 	@Test
 	void uploadFile() {
-		assertThat(this.slackService.uploadFile("greeting.txt", "Hello, world!")).isTrue();
+		assertThat(this.slackService.uploadFile("Greeting", "Hello, world!")).isTrue();
 	}
 
 }

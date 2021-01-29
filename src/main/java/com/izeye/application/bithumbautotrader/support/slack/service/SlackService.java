@@ -9,6 +9,6 @@ public interface SlackService {
 
 	boolean sendMessage(String message);
 
-	boolean uploadFile(String filename, String content);
+	boolean uploadFile(String title, String content);
 
 }
