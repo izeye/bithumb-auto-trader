@@ -2,8 +2,8 @@ package com.izeye.application.bithumbautotrader.support.notifier.service;
 
 import org.springframework.stereotype.Service;
 
-import com.izeye.application.bithumbautotrader.support.messaging.service.MessagingService;
 import com.izeye.application.bithumbautotrader.support.notifier.domain.Notification;
+import com.izeye.application.bithumbautotrader.support.slack.service.SlackService;
 
 /**
  * Slack-based {@link Notifier}.
@@ -13,16 +13,16 @@ import com.izeye.application.bithumbautotrader.support.notifier.domain.Notificat
 @Service
 public class SlackNotifier implements Notifier {
 
-	private final MessagingService messagingService;
+	private final SlackService slackService;
 
-	public SlackNotifier(MessagingService messagingService) {
-		this.messagingService = messagingService;
+	public SlackNotifier(SlackService slackService) {
+		this.slackService = slackService;
 	}
 
 	@Override
 	public void notify(Notification notification) {
-		String message = String.format("Message: %s\nDetail:\n%s", notification.getMessage(), notification.getDetail());
-		this.messagingService.sendMessage(message);
+		this.slackService.sendMessage("Message: " + notification.getMessage());
+		this.slackService.uploadFile("Detail", notification.getDetail());
 	}
 
 }
